@@ -39,15 +39,8 @@ const runSearch = function (name: string, root: string, cb: Function) {
     
     try {
       let obj = JSON.parse(json);
-      
-      // const packages = Object.keys(obj).map(function(k: string){
-      //     return {
-      //       [k] : obj[k]
-      //     }
-      // });
-      
       if(Array.isArray(obj)){
-        console.log('cmd yielded an array:', cmd);
+        // console.log('cmd yielded an array:', cmd);
         obj = obj[0] || {};
       }
       
@@ -105,8 +98,8 @@ export const makeGetDependencies = function (inputPackage: string, packagesThatD
         }
         
         
-        return String(k).trim();
-        // return [String(k).trim(), '@', String(version).trim()].join('');
+        // return String(k).trim();
+        return [String(k).trim(), '@', String(version).trim()].join('');
       });
       
       async.eachLimit(packagesWithVersion, 3, function (name: string, cb: Function) {

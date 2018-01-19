@@ -10,6 +10,9 @@ import util = require('util');
 import path = require('path');
 import residence = require('residence');
 import cp = require('child_process');
+import * as semver from 'semver';
+import fs = require('fs');
+
 const maxDepth = 20;
 
 const runSearch = function (name: string, root: string, cb: Function) {
@@ -33,13 +36,13 @@ const runSearch = function (name: string, root: string, cb: Function) {
     
     let json = String(stdout).trim();
     
-    if(!json){
+    if (!json) {
       json = '{}';
     }
     
     try {
       let obj = JSON.parse(json);
-      if(Array.isArray(obj)){
+      if (Array.isArray(obj)) {
         // console.log('cmd yielded an array:', cmd);
         obj = obj[0] || {};
       }
@@ -60,13 +63,14 @@ const runSearch = function (name: string, root: string, cb: Function) {
   
 };
 
-export const makeGetDependencies = function (inputPackage: string, packagesThatDependOnInput: Array<string>, root: string) {
+export const makeGetDependencies = function (inputPackage: string, packagesThatDependOnInput: Array<string>,
+                                             root: string, isLocal: boolean, pkgJSON: any) {
   
   return function getDependencies(name: string, depth: number, cb: Function) {
     
-    runSearch(name, root, function (err: Error, nameVersionMap: IPackages) {
+    const handleResults = function (err: Error, nameVersionMap: IPackages) {
       
-      if(err){
+      if (err) {
         return cb(err);
       }
       
@@ -90,16 +94,8 @@ export const makeGetDependencies = function (inputPackage: string, packagesThatD
       
       const packagesWithVersion = packages.map(function (k: string) {
         
-        const version = nameVersionMap[k];
-        
-        if(typeof version !== 'string'){
-          console.log('version is not a string:', version);
-          console.log('nameversionmap:', nameVersionMap);
-        }
-        
-        
-        // return String(k).trim();
-        return [String(k).trim(), '@', String(version).trim()].join('');
+        const version = semver.clean(nameVersionMap[k]);
+        return [String(k).trim(), '@', version].join('');
       });
       
       async.eachLimit(packagesWithVersion, 3, function (name: string, cb: Function) {
@@ -108,7 +104,16 @@ export const makeGetDependencies = function (inputPackage: string, packagesThatD
         cb as any
       );
       
-    });
+    };
+    
+    if (isLocal === true && depth === 0) {
+      process.nextTick(function () {
+        handleResults(null, pkgJSON.dependencies || {});
+      });
+    }
+    else {
+      runSearch(name, root, handleResults);
+    }
     
   };
   

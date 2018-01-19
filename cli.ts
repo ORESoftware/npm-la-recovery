@@ -6,6 +6,7 @@ import residence = require('residence');
 import {makeGetDependencies} from "./lib";
 const root = residence.findProjectRoot(process.cwd());
 const indexOfName = process.argv.indexOf('--name');
+const isLocal = process.argv.indexOf('--local') > 0;
 
 if(indexOfName < 0){
   throw 'No package name received at the command line, use the "--name" option.\n';
@@ -17,13 +18,6 @@ if (!inputName) {
   throw 'No package name received at the command line, use the "--name" option.\n';
 }
 
-if (!root) {
-  throw new Error('Could not find project root given current working directory.');
-}
-
-const packagesThatDependOnInput = [] as Array<string>;
-const getDependencies = makeGetDependencies(inputName, packagesThatDependOnInput, root);
-
 let pkg;
 
 try {
@@ -34,13 +28,24 @@ catch (err) {
   throw err;
 }
 
-const name = pkg.name;
+const pkgName = pkg.name;
 
-if (!name) {
+if (!pkgName) {
   throw new Error('No name property available for package.json file.');
 }
 
-getDependencies(inputName, 0, function (err: Error) {
+const cleanInputName = String(inputName).trim();
+console.log(`We are searching for dependants of: "${cleanInputName}", anywhere in package with name: "${pkgName}"`);
+
+if (!root) {
+  throw new Error('Could not find project root given current working directory.');
+}
+
+const packagesThatDependOnInput = [] as Array<string>;
+const getDependencies = makeGetDependencies(cleanInputName, packagesThatDependOnInput, root, isLocal, pkg);
+
+
+getDependencies(pkgName, 0, function (err: Error) {
   
   if (err) {
     throw err;

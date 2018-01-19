@@ -1,0 +1,33 @@
+{
+  "name": "npm-la-recovery",
+  "version": "0.0.101",
+  "description": "Recover dependency tree from project where npm install is failing.",
+  "main": "index.js",
+  "scripts": {
+    "test": "suman"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ORESoftware/npm-la-recovery.git"
+  },
+  "keywords": [
+    "npm",
+    "install",
+    "recovery"
+  ],
+  "author": "Olegzandr VD",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ORESoftware/npm-la-recovery/issues"
+  },
+  "homepage": "https://github.com/ORESoftware/npm-la-recovery#readme",
+  "dependencies": {
+    "async": "^2.6.0",
+    "residence": "0.0.207"
+  },
+  "devDependencies": {
+    "@types/async": "^2.0.47",
+    "@types/core-js": "^0.9.45",
+    "@types/node": "^9.3.0"
+  }
+}
